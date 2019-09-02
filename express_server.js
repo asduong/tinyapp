@@ -26,10 +26,12 @@ app.get("/hello", (req, res) => {
   res.render("hello_world", templateVars);
 });
 
-
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`);
+app.get("/urls/:shortURL", (req, res) => {
+  let templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: req.params.longURL /* What goes here? */
+  };
+  res.render("urls_show", templateVars);
 });
 
 app.get("/urls", (req, res) => {
@@ -37,4 +39,9 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
+});
+
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`);
 });
