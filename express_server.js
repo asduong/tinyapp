@@ -18,6 +18,8 @@ function generateRandomString() {
   return key;
 };
 
+
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -44,14 +46,17 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);
-  res.send("Ok");
+  const key = generateRandomString();
+  // console.log(req.body);
+  const longURL = req.body.longURL;
+  urlDatabase[key] = longURL;
+  res.redirect(`./urls/${key}`);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
-    longURL: req.params.longURL /* What goes here? */
+    longURL: urlDatabase[req.params.shortURL] /* What goes here? */
   };
   res.render("urls_show", templateVars);
 });
@@ -63,8 +68,16 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.send(404);
+  }
+
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
-
-console.log(generateRandomString());
