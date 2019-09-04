@@ -1,3 +1,7 @@
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+</head>
 <header>
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
     <a class="navbar-brand" href="/urls">TinyApp</a>
@@ -9,6 +13,18 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <%if(!username) { %>
+        <div style="position:absolute; right:100px">
+          <form method="POST" action="/login">Login: <input type="text" name="username"><button type="submit"
+              class="btn btn-primary">Submit</button></form>
+        </div>
+        <%} else { %>
+        <div style="position:absolute; right:100px">
+          <form method="POST" action="/logout">Logged In As: <%=username%> <button type="submit"
+              class="btn btn-danger">Logout</button></form>
+        </div>
+        <%} %>
+
       </div>
     </div>
   </nav>
