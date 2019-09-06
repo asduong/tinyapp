@@ -1,6 +1,10 @@
-const getUserByEmail = function (email, database) {
-  // lookup magic...
-  return database[email];
+const getUserByEmail = (email, database) => {
+  for (let user in database) {
+    if (database[user].email === email) {
+      return user;
+    }
+  }
+
 };
 
 module.exports = {

@@ -3,9 +3,9 @@ const app = express();
 const PORT = 8080; // default ports 8080
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
-const bcrypt = require('bcrypt');
-const helper = require('./helpers');
+const bcrypt = require("bcrypt");
 
+// database of the users
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -46,6 +46,7 @@ const generateRandomString = () => {
   return key;
 };
 
+// Database of the URLs
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -57,6 +58,7 @@ const urlDatabase = {
   }
 };
 
+// re-directs the pages to /urls
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -65,6 +67,7 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+// renders the create new URL page
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     user_id: req.session.user_id,
@@ -74,8 +77,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-
-
+// Adds URLs to the database and re-directs to the new URL created
 app.post("/urls", (req, res) => {
   const key = generateRandomString();
   const longURL = req.body.longURL;
@@ -91,6 +93,7 @@ app.post("/urls", (req, res) => {
   }
 });
 
+// Shows the page of the URL that was created
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
@@ -102,6 +105,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// Function to check if the URL ID matches the User ID it will append to userURL
 const urlsForUser = (userID) => {
   const userURL = {};
   for (let shortURL in urlDatabase) {
@@ -112,6 +116,7 @@ const urlsForUser = (userID) => {
   return userURL;
 };
 
+// Displays the front page rendering from urls_index page
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlsForUser(req.session.user_id),
@@ -126,6 +131,7 @@ app.get("/urls", (req, res) => {
   }
 });
 
+// Allows other users to see the pages created
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if (longURL) {
@@ -135,24 +141,24 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+// Allows logged in user to delete their own link
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
     delete urlDatabase[req.params.shortURL];
   }
-
   res.redirect("/urls");
-
 });
+
+// Allows logged in user to edit their own link
 app.post("/urls/:shortURL/edit", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
     urlsForUser(req.session.user_id);
   }
-
-  // urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect("/urls");
 });
 
+// Renders the newly created URL
 app.get("/urls/:shortURL/", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
@@ -163,12 +169,14 @@ app.get("/urls/:shortURL/", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-
+// Allows user to logout
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
 });
 
+
+// Renders the registration page
 app.get("/register", (req, res) => {
   let templateVars = {
     user_id: req.session.user_id,
@@ -178,7 +186,7 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
-
+// Allows user to create a login ID(email and password)
 app.post("/register", (req, res) => {
 
   let userID = generateRandomString();
@@ -187,7 +195,6 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 10)
   };
-  console.log(users);
   if (req.body.email === '' || req.body.password === '') {
     res.send(404);
   } else {
@@ -196,6 +203,7 @@ app.post("/register", (req, res) => {
   }
 });
 
+// Renders the login page
 app.get("/login", (req, res) => {
   let templateVars = {
     user_id: req.session.user_id,
@@ -204,11 +212,10 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
+// Allows user to login checking credentials against the users database
 app.post("/login", (req, res) => {
   for (let user in users) {
-    console.log(users[user].email === req.body.email && bcrypt.compareSync(req.body.password, users[user].password));
     if (users[user].email === req.body.email && bcrypt.compareSync(req.body.password, users[user].password)) {
-      // console.log(helper.getUserByEmail(users[user].email, users)); //called here
       req.session.user_id = user;
       res.redirect("/urls");
     }
@@ -220,3 +227,7 @@ app.post("/login", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
+
+module.exports = {
+  users
+};
